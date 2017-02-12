@@ -33,7 +33,17 @@ public class PomParser extends DefaultHandler {
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			saxParser.parse(new File(path), this);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			e.printStackTrace();  // TODO 优化异常处理使在多线程读取比较时不中断，待查证修改
+			e.printStackTrace(); // TODO 优化异常处理使在多线程读取比较时不中断，待查证修改
+		}
+	}
+
+	public void readPom(File file) {
+		this.fileName = file.getName();
+		try {
+			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+			saxParser.parse(file, this);
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			e.printStackTrace(); // TODO 优化异常处理使在多线程读取比较时不中断，待查证修改
 		}
 	}
 

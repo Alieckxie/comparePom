@@ -1,6 +1,7 @@
 package com.alieckxie.comparePom;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import com.alieckxie.comparePom.action.DoCompare;
@@ -8,6 +9,7 @@ import com.alieckxie.comparePom.action.DoUpdate;
 import com.alieckxie.comparePom.action.WriteXML;
 import com.alieckxie.comparePom.bean.ArgumentBean;
 import com.alieckxie.comparePom.bean.DependencyBean;
+import com.alieckxie.comparePom.util.FileCollector;
 import com.alieckxie.comparePom.util.PomParser;
 
 public class Main {
@@ -106,9 +108,9 @@ public class Main {
 		return argumentBean;
 	}
 	
-	public static void doAction(ArgumentBean argumentBean) throws Exception{
+	public static void doAction(ArgumentBean argumentBean) throws Exception {
 		// 判断标准pom是否是文件
-		if(!new File(argumentBean.getStandardPomPath()).isFile()){
+		if (!new File(argumentBean.getStandardPomPath()).isFile()) {
 			throw new Exception("这不是一种标准pom！");
 		}
 		// 创建读取器读取标准pom文件
@@ -116,22 +118,33 @@ public class Main {
 		parser.readPom(argumentBean.getStandardPomPath());
 		Map<DependencyBean, String> pomBeStandardMap = parser.getDependencyBeanMap();
 		// 判断是否需要更新
-		if(argumentBean.isNeedUpdate()){
+		if (argumentBean.isNeedUpdate()) {
 			DoUpdate doUpdate = new DoUpdate();
 			doUpdate.updateFromRepo(pomBeStandardMap.keySet());
 		}
-		// 读取受检pom
-		parser.readPom(argumentBean.getCheckedPomPath());
-		Map<DependencyBean, String> pomBeCheckedMap = parser.getDependencyBeanMap();
+
+		// 收集受检pom路径下的所有pom文件
+		List<File> pomList = FileCollector.collectPom(argumentBean.getCheckedPomPath());
+
 		// 判断是否需要将差异合并至受检pom
-		if(argumentBean.isNeedMerge()){
-			// 进行比较，生成报告，合并结果，写出到文件
-			DoCompare.compareToStandardAndMerge(pomBeCheckedMap, pomBeStandardMap);
-			WriteXML writeXML = new WriteXML(argumentBean.getCheckedPomPath(), "project");
-			writeXML.writePom(pomBeCheckedMap.keySet());
-		}else{
-			// 进行比较并只生成报告
-			DoCompare.compareToStandard(pomBeCheckedMap, pomBeStandardMap);
+		if (argumentBean.isNeedMerge()) {
+			for (File pom : pomList) {
+				// 读取受检pom
+				parser.readPom(pom);
+				Map<DependencyBean, String> pomBeCheckedMap = parser.getDependencyBeanMap();
+				// 进行比较，生成报告，合并结果，写出到文件
+				DoCompare.compareToStandardAndMerge(pomBeCheckedMap, pomBeStandardMap);
+				WriteXML writeXML = new WriteXML(argumentBean.getCheckedPomPath(), "project");
+				writeXML.writePom(pomBeCheckedMap.keySet());
+			}
+		} else {
+			for (File pom : pomList) {
+				// 读取受检pom
+				parser.readPom(pom);
+				Map<DependencyBean, String> pomBeCheckedMap = parser.getDependencyBeanMap();
+				// 进行比较并只生成报告
+				DoCompare.compareToStandard(pomBeCheckedMap, pomBeStandardMap);
+			}
 		}
 	}
 
