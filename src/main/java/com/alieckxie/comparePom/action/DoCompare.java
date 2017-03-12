@@ -1,6 +1,6 @@
 package com.alieckxie.comparePom.action;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.alieckxie.comparePom.bean.DependencyBean;
@@ -10,9 +10,17 @@ public class DoCompare {
 
 	private static void doCompare(Map<DependencyBean, String> pomBeCheckedMap,
 			Map<DependencyBean, String> pomBeStandardMap, boolean isNeedMerge) {
-		Map<String, String> resultMap = new HashMap<>();
+		Map<String, String> resultMap = new LinkedHashMap<>();
 		for (Map.Entry<DependencyBean, String> pomBeChecked : pomBeCheckedMap.entrySet()) {
 			DependencyBean beCheckedDependencyBean = pomBeChecked.getKey();
+			if ("".equals(beCheckedDependencyBean.getScope()) || "compile".equals(beCheckedDependencyBean.getScope())) {
+				System.err.println(beCheckedDependencyBean + "受检件的scope范围异常，需要强制provide");
+				beCheckedDependencyBean.setScope("provide");
+			}
+			if (!beCheckedDependencyBean.getGroupId().contains("com.cfets.")) {
+				System.out.println("跳过检测和比较构件：" + beCheckedDependencyBean);
+				continue;
+			}
 			String standardVersion = pomBeStandardMap.get(beCheckedDependencyBean);
 			if (standardVersion == null) {
 				resultMap.put(beCheckedDependencyBean.toString(), "标准pom中没有该构件");
@@ -23,17 +31,19 @@ public class DoCompare {
 				result = CompareUtil.compareVersion(standardVersion, pomBeChecked.getValue());
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
-				System.out.println("该构件的版本号比较出错：" + beCheckedDependencyBean);
+				System.out.println("该构件的版本号比较出错：" + beCheckedDependencyBean + "，将不作处理");
 				continue;
 			}
 			if (result != null) {
 				resultMap.put(beCheckedDependencyBean.toString(), result);
-				if(isNeedMerge){
+				if (isNeedMerge) {
 					beCheckedDependencyBean.setVersion(result);
 				}
 			}
 		}
+		System.out.println();
 		if (resultMap.size() != 0) {
+			System.out.println("比较结果如下：");
 			for (Map.Entry<String, String> aResult : resultMap.entrySet()) {
 				System.out.println(aResult);
 			}

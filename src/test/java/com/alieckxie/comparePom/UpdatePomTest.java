@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.alieckxie.comparePom.action.WriteXML;
 import com.alieckxie.comparePom.bean.DependencyBean;
 import com.alieckxie.comparePom.util.PomParser;
 import com.alieckxie.comparePom.util.PomVersionExplorer;
+import com.alieckxie.comparePom.util.XMLWriter;
 
 public class UpdatePomTest {
 
@@ -27,7 +27,7 @@ public class UpdatePomTest {
 			}
 		}
 		String fileName = "src/test/resources/output.xml";
-		WriteXML writeXML = new WriteXML(fileName, "project");
+		XMLWriter writeXML = new XMLWriter(fileName, "project");
 		writeXML.writePom(keySet);
 	}
 

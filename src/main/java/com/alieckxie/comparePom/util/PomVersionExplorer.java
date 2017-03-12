@@ -9,7 +9,7 @@ public class PomVersionExplorer {
 
 	public static String getLatestVersionFromRepo(String groupId, String artifactId) {
 		try {
-			URL url = new URL("http://200.31.154.183:8081/nexus/service/local/lucene/search?_dc=1486639245856&g="
+			URL url = new URL("http://maven.aliyun.com/nexus/service/local/lucene/search?_dc=1486639245856&g="
 					+ groupId + "&a=" + artifactId + "&collapseresults=true");
 			URLConnection connection = url.openConnection();
 			connection.setRequestProperty("User-Agent",
@@ -36,7 +36,14 @@ public class PomVersionExplorer {
 
 			String latestRelease = getJsonValueByAttr(json, "latestRelease");
 
-			System.out.println("构件【" + artifactId + "】在仓库中共有" + totalCount + "个，最新的版本为" + latestRelease);
+			StringBuilder sb = new StringBuilder("构件【").append(artifactId).append("】在仓库中共有").append(totalCount)
+					.append("个");
+			if (!"0".equals(totalCount)) {
+				sb.append("，最新的版本为：").append(latestRelease);
+			} else {
+				sb.append("，请检查你连接的maven仓库，以及你pom中的依赖坐标！");
+			}
+			System.out.println(sb.toString());
 			return latestRelease;
 		} catch (IOException e) {
 			e.printStackTrace();

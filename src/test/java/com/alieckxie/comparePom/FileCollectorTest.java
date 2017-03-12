@@ -12,6 +12,10 @@ public class FileCollectorTest {
 	
 	public void findFiles(String basePath, String targetFileName, List<File> fileList) {
 		File baseFile = new File(basePath);
+		if(!baseFile.isDirectory()){
+			fileList.add(baseFile);
+			return;
+		}
 		File[] listFiles = baseFile.listFiles();
 		for (File file : listFiles) {
 			if (file.isDirectory()) {
@@ -28,7 +32,7 @@ public class FileCollectorTest {
 	@Test
 	public void testFindPom(){
 		List<File> fileList = new ArrayList<File>();
-		findFiles("C:\\Users\\Alieckxie\\git", "pom.xml", fileList);
+		findFiles("C:\\Users\\ht-xiexy\\git\\dealcommon\\pom.xml", "pom.xml", fileList);
 		for (File file : fileList) {
 			System.out.println(file);
 		}

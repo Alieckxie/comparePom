@@ -14,10 +14,14 @@ public class FileCollector {
 
 	public static void findPomFiles(String basePath, String targetFileName, List<File> fileList) {
 		File baseFile = new File(basePath);
+		if(!baseFile.isDirectory()){
+			fileList.add(baseFile);
+			return;
+		}
 		File[] listFiles = baseFile.listFiles();
 		for (File file : listFiles) {
 			if (file.isDirectory()) {
-				findFiles(file.getAbsolutePath(), targetFileName, fileList);
+				findPomFiles(file.getAbsolutePath(), targetFileName, fileList);
 			} else if (file.isFile()) {
 				if (file.getName().equals(targetFileName)
 						&& !file.getPath().contains(File.separator + "target" + File.separator)) {
@@ -29,6 +33,10 @@ public class FileCollector {
 
 	public static void findFiles(String basePath, String targetFileName, List<File> fileList) {
 		File baseFile = new File(basePath);
+		if(!baseFile.isDirectory()){
+			fileList.add(baseFile);
+			return;
+		}
 		File[] listFiles = baseFile.listFiles();
 		for (File file : listFiles) {
 			if (file.isDirectory()) {

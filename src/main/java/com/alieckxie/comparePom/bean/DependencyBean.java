@@ -6,9 +6,9 @@ public class DependencyBean {
 
 	private String artifactId;
 
-	private String version;
+	private String version = "";
 
-	private String scope;
+	private String scope = "";
 
 	public String getGroupId() {
 		return groupId;
